@@ -1,43 +1,34 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Todo } from './models/todos.schema';
 
 @Injectable()
 export class TodosService {
-  private todos = [];
-  private id = 1;
+  constructor(
+    @InjectModel(Todo.name) private readonly todoModel: Model<Todo>,
+  ) {}
 
   getAll() {
-    return this.todos;
+    return this.todoModel.find().exec();
   }
 
-  getOne(id: number) {
-    return this.todos.find((todo) => todo.id === id);
+  getOne(id: string) {
+    return this.todoModel.findById(id).exec();
   }
 
-  create(todo: any) {
-    const newTodo = {
-      id: this.id++,
-      title: todo.title || 'Untitled',
-      done: todo.done || false,
-    };
-    this.todos.push(newTodo);
-    return newTodo;
+  create(todo: Partial<Todo>) {
+    return this.todoModel.create(todo);
   }
 
-  update(id: number, updatedTodo: any) {
-    const todo = this.todos.find((t) => t.id === id);
-    if (todo) {
-      todo.title = updatedTodo.title ?? todo.title;
-      todo.done = updatedTodo.done ?? todo.done;
-    }
-    return todo;
+  update(id: string, updatedTodo: Partial<Todo>) {
+    return this.todoModel
+      .findByIdAndUpdate(id, updatedTodo, { new: true, runValidators: true })
+      .exec();
   }
 
-  delete(id: number) {
-    const index = this.todos.findIndex((t) => t.id === id);
-    if (index !== -1) {
-      this.todos.splice(index, 1);
-      return { message: 'Todo deleted' };
-    }
-    return { message: 'Todo not found' };
+  async delete(id: string) {
+    const todo = await this.todoModel.findByIdAndDelete(id).exec();
+    return { message: todo ? 'Todo deleted' : 'Todo not found' };
   }
 }

@@ -1,5 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { TodosService } from './todos.service';
+import { Todo } from './models/todos.schema';
 
 @Controller('todos')
 export class TodosController {
@@ -11,22 +20,22 @@ export class TodosController {
   }
 
   @Get(':id')
-  getOne(@Param('id', ParseIntPipe) id: number) {
+  getOne(@Param('id') id: string) {
     return this.todosService.getOne(id);
   }
 
   @Post()
-  create(@Body() todo: any) {
+  create(@Body() todo: Partial<Todo>) {
     return this.todosService.create(todo);
   }
 
   @Put(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() todo: any) {
+  update(@Param('id') id: string, @Body() todo: Partial<Todo>) {
     return this.todosService.update(id, todo);
   }
 
   @Delete(':id')
-  delete(@Param('id', ParseIntPipe) id: number) {
+  delete(@Param('id') id: string) {
     return this.todosService.delete(id);
   }
 }
